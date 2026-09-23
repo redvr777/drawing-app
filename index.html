@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DrawForge</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">DrawForge</div>
+    <nav class="menus">
+      <button data-menu="file">File</button><button data-menu="edit">Edit</button><button data-menu="image">Image</button>
+      <button data-menu="layer">Layer</button><button data-menu="select">Select</button><button data-menu="view">View</button><button data-menu="help">Help</button>
+    </nav>
+    <div class="top-actions"><button id="undoBtn" title="Ctrl+Z">↶</button><button id="redoBtn" title="Ctrl+Y">↷</button><button id="saveBtn">Save</button></div>
+  </header>
+
+  <div class="workspace">
+    <aside class="toolbar" id="toolbar">
+      <button class="tool active" data-tool="brush" title="Brush (B)">✎</button>
+      <button class="tool" data-tool="pencil" title="Pencil (P)">✐</button>
+      <button class="tool" data-tool="eraser" title="Eraser (E)">⌫</button>
+      <button class="tool" data-tool="line" title="Line (L)">╱</button>
+      <button class="tool" data-tool="rectangle" title="Rectangle (R)">□</button>
+      <button class="tool" data-tool="ellipse" title="Ellipse">○</button>
+      <button class="tool" data-tool="polygon" title="Polygon">⬠</button>
+      <button class="tool" data-tool="fill" title="Fill (G)">▧</button>
+      <button class="tool" data-tool="gradient" title="Gradient">◩</button>
+      <button class="tool" data-tool="stencil" title="Stencil">☆</button>
+      <button class="tool" data-tool="picker" title="Color Picker (I)">⌾</button>
+      <button class="tool" data-tool="text" title="Text (T)">T</button>
+      <button class="tool" data-tool="move" title="Move (M)">✥</button>
+      <button class="tool" data-tool="selectRect" title="Rectangular Selection">▣</button>
+      <button class="tool" data-tool="selectEllipse" title="Elliptical Selection">◉</button>
+      <button class="tool" data-tool="selectLasso" title="Lasso Selection">⌁</button>
+      <button class="tool" data-tool="transform" title="Transform">⤢</button>
+      <div class="tool-sep"></div>
+      <button id="swapColors" title="Swap foreground/background">⇄</button>
+      <button id="defaultColors" title="Default colors">D</button>
+    </aside>
+
+    <main class="center">
+      <div class="optionsbar">
+        <label>Size <input id="size" type="range" min="1" max="200" value="24"><output id="sizeOut">24</output></label>
+        <label>Opacity <input id="opacity" type="range" min="1" max="100" value="100"><output id="opacityOut">100%</output></label>
+        <label>Hardness <input id="hardness" type="range" min="0" max="100" value="80"><output id="hardnessOut">80%</output></label>
+        <label>Flow <input id="flow" type="range" min="1" max="100" value="100"><output id="flowOut">100%</output></label>
+        <label>Brush <select id="brushPreset"><option>Basic Round</option><option>Soft Round</option><option>Hard Round</option><option>Pencil</option><option>Ink</option><option>Marker</option><option>Airbrush</option><option>Chalk</option><option>Paint</option><option>Pixel Brush</option></select></label>
+        <label>Stencil <select id="stencil"><option value="none">None</option><option value="circle">Circle</option><option value="square">Square</option><option value="triangle">Triangle</option><option value="star">Star</option><option value="heart">Heart</option><option value="arrow">Arrow</option><option value="diamond">Diamond</option><option value="hexagon">Hexagon</option><option value="cloud">Cloud</option><option value="speech">Speech Bubble</option><option value="lightning">Lightning</option></select></label>
+        <button id="fillMode" class="toggle">Outline</button>
+        <label id="fontWrap" class="hidden">Font <select id="font"><option>Arial</option><option>Georgia</option><option>Courier New</option><option>Verdana</option><option>Impact</option></select></label>
+        <label id="fontSizeWrap" class="hidden">Text <input id="fontSize" type="number" min="4" max="300" value="48"></label>
+      </div>
+      <div id="canvasArea">
+        <div id="canvasViewport">
+          <div id="canvasFrame">
+            <canvas id="artCanvas"></canvas>
+            <canvas id="overlayCanvas"></canvas>
+            <div id="brushCursor"></div>
+          </div>
+        </div>
+      </div>
+      <footer class="statusbar">
+        <span id="toolStatus">Brush</span><span id="coords">0, 0</span><span id="dimensions">No document</span>
+        <span class="spacer"></span><button id="zoomOut">−</button><span id="zoomLabel">100%</span><button id="zoomIn">+</button><button id="fitBtn">Fit</button>
+      </footer>
+    </main>
+
+    <aside class="rightbar">
+      <section class="panel colors">
+        <div class="panel-title">Color</div>
+        <div class="color-main"><div id="sv" class="sv"><div id="svCursor"></div></div><input id="hue" type="range" min="0" max="360" value="0" class="hue"></div>
+        <div class="swatches"><div id="fg" class="swatch"></div><div id="bg" class="swatch bg"></div></div>
+        <div class="color-fields"><label>HEX <input id="hex" value="#000000"></label><label>RGB <input id="rgb" value="0, 0, 0"></label><label>A <input id="alpha" type="number" min="0" max="100" value="100"></label></div>
+        <input id="nativeColor" type="color" value="#000000" aria-label="Choose color" class="native-color">
+        <div id="recentColors" class="palette"></div>
+        <div class="palette-actions"><button id="addPalette">Add</button><button id="clearPalette">Clear</button></div>
+      </section>
+
+      <section class="panel layers-panel">
+        <div class="panel-title">Layers <span><button id="newLayer">＋</button><button id="newGroup">▣</button></span></div>
+        <div id="layers"></div>
+        <div class="layer-actions"><button id="layerUp">↑</button><button id="layerDown">↓</button><button id="duplicateLayer">⧉</button><button id="deleteLayer">−</button></div>
+        <label class="layer-opacity">Opacity <input id="layerOpacity" type="range" min="0" max="100" value="100"></label>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="panel-title">History</div><div id="history"></div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<div id="startModal" class="modal open">
+  <div class="dialog start">
+    <h1>Create New Drawing</h1>
+    <div class="start-grid">
+      <label>Width <input id="newW" type="number" min="1" max="10000" value="1920"></label>
+      <label>Height <input id="newH" type="number" min="1" max="10000" value="1080"></label>
+      <label>Preset <select id="preset"><option value="1920x1080">1920 × 1080</option><option value="1280x720">1280 × 720</option><option value="1080x1080">1080 × 1080</option><option value="2048x2048">2048 × 2048</option><option value="custom">Custom</option></select></label>
+      <label>Background <input id="newBg" type="color" value="#ffffff"></label>
+      <label class="check"><input id="transparent" type="checkbox"> Transparent background</label>
+    </div>
+    <div class="dialog-actions"><button id="openImageStart" class="secondary">Open Image</button><button id="openProjectStart" class="secondary">Open Project</button><button id="createBtn" class="primary">Create</button></div>
+  </div>
+</div>
+
+<div id="textModal" class="modal"><div class="dialog"><h2>Add Text</h2><textarea id="textValue" rows="4" placeholder="Enter text..."></textarea><div class="text-controls"><label>Size <input id="modalFontSize" type="number" value="48"></label><label><input id="bold" type="checkbox"> Bold</label><label><input id="italic" type="checkbox"> Italic</label></div><div class="dialog-actions"><button id="textCancel">Cancel</button><button id="textApply" class="primary">Add Text</button></div></div></div>
+
+<input id="fileInput" type="file" hidden accept="image/png,image/jpeg,image/webp,image/svg+xml,.draw,.myart,application/json">
+<input id="projectInput" type="file" hidden accept=".draw,.myart,application/json">
+<div id="contextMenu" class="context hidden"></div>
+<div id="toast"></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
